@@ -1,0 +1,8 @@
+{
+  "name": "AuraDay - Morning Focus & Daily Inspiration",
+  "description": "Start every morning with calm intention. Features the Daily Thought of the Day, Top 3 Priorities workspace, streak tracking, weekly insights, 365-day quote archive, and installable PWA experience.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
