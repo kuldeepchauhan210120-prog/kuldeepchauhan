@@ -44,17 +44,44 @@ export default function App() {
   const [user, setUser] = useState<UserProfile>(() => storage.loadProfile());
   const [themeId, setThemeId] = useState<ThemeId>(() => storage.loadTheme());
 
-  // App Version Edition (v2.5 Full Suite vs v1.0 Classic) & Mobile App Shell Mode
+  // App Version Edition (v2.5 Full Suite vs Separate Websites: v1.0, exam_only, flashgenie_only) & Mobile App Shell Mode
   const [appEdition, setAppEdition] = useState<AppEdition>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const portal = params.get('portal');
+      if (portal === 'auraday') return 'v1.0';
+      if (portal === 'exam') return 'exam_only';
+      if (portal === 'flashgenie') return 'flashgenie_only';
+      if (portal === 'suite') return 'v2.5';
+    }
     const saved = localStorage.getItem('auraday_app_edition');
-    return (saved === 'v1.0' || saved === 'v2.5') ? saved : 'v2.5';
+    return (saved === 'v1.0' || saved === 'v2.5' || saved === 'exam_only' || saved === 'flashgenie_only')
+      ? (saved as AppEdition)
+      : 'v2.5';
   });
   const [isMobileAppShell, setIsMobileAppShell] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('mode') === 'app') return true;
+      if (params.get('mode') === 'website') return false;
+    }
     return localStorage.getItem('auraday_mobile_shell') === 'true';
   });
 
   // Main View Mode: Morning Focus (AuraDay) vs Exam Coach vs FlashGenie
-  const [currentView, setCurrentView] = useState<'morning' | 'exam_coach' | 'flashgenie'>('morning');
+  const [currentView, setCurrentView] = useState<'morning' | 'exam_coach' | 'flashgenie'>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const portal = params.get('portal');
+      if (portal === 'exam') return 'exam_coach';
+      if (portal === 'flashgenie') return 'flashgenie';
+      if (portal === 'auraday') return 'morning';
+    }
+    const saved = localStorage.getItem('auraday_app_edition');
+    if (saved === 'exam_only') return 'exam_coach';
+    if (saved === 'flashgenie_only') return 'flashgenie';
+    return 'morning';
+  });
 
   // Examination Database & Plan State
   const [exams, setExams] = useState<ExamDefinition[]>(() => loadAllExams());
@@ -164,6 +191,10 @@ export default function App() {
     localStorage.setItem('auraday_app_edition', appEdition);
     if (appEdition === 'v1.0' && currentView !== 'morning') {
       setCurrentView('morning');
+    } else if (appEdition === 'exam_only' && currentView !== 'exam_coach') {
+      setCurrentView('exam_coach');
+    } else if (appEdition === 'flashgenie_only' && currentView !== 'flashgenie') {
+      setCurrentView('flashgenie');
     }
   }, [appEdition, currentView]);
 
@@ -528,6 +559,94 @@ export default function App() {
             : ''
         }`}
       >
+        {/* Separate Websites & App Mode Quick-Switcher Strip */}
+        {!isMobileAppShell && (
+          <div className="bg-slate-950/90 border-b border-slate-800/80 px-3 sm:px-6 py-2 text-[11px] font-semibold text-slate-300">
+            <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center flex-wrap gap-1.5">
+                <span className="text-slate-400 uppercase tracking-wider text-[10px] font-bold mr-1">
+                  Separate Websites:
+                </span>
+                <button
+                  onClick={() => {
+                    setAppEdition('v1.0');
+                    setCurrentView('morning');
+                  }}
+                  className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${
+                    appEdition === 'v1.0'
+                      ? 'bg-amber-500 text-slate-950 font-bold shadow-sm'
+                      : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800'
+                  }`}
+                >
+                  <span>☀️</span>
+                  <span>1. AuraDay Website (Original v1.0)</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setAppEdition('exam_only');
+                    setCurrentView('exam_coach');
+                  }}
+                  className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${
+                    appEdition === 'exam_only'
+                      ? 'bg-sky-500 text-slate-950 font-bold shadow-sm'
+                      : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800'
+                  }`}
+                >
+                  <span>🎓</span>
+                  <span>2. Exam Coach Website (Separate)</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setAppEdition('flashgenie_only');
+                    setCurrentView('flashgenie');
+                  }}
+                  className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${
+                    appEdition === 'flashgenie_only'
+                      ? 'bg-rose-500 text-white font-bold shadow-sm'
+                      : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800'
+                  }`}
+                >
+                  <span>🧞‍♂️</span>
+                  <span>3. FlashGenie Website (Separate)</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setAppEdition('v2.5');
+                    setCurrentView('morning');
+                  }}
+                  className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${
+                    appEdition === 'v2.5'
+                      ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm'
+                      : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800'
+                  }`}
+                >
+                  <span>✨</span>
+                  <span>All-in-One v2.5</span>
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsMobileAppShell(true)}
+                  className="px-2.5 py-1 rounded-lg bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 hover:bg-indigo-500 hover:text-white transition flex items-center gap-1"
+                >
+                  <Smartphone className="w-3 h-3" />
+                  <span>Mobile App Mode</span>
+                </button>
+                <button
+                  onClick={() => setActiveModal('version')}
+                  className="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 hover:bg-amber-500 hover:text-slate-950 transition"
+                >
+                  🔗 Get Separate Links
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Mobile App Status Bar Strip (Visible in Mobile App Version Mode) */}
         {isMobileAppShell && (
           <div className="bg-black/40 backdrop-blur-md px-5 py-2 flex items-center justify-between text-[11px] font-semibold border-b border-inherit/20">
@@ -676,7 +795,7 @@ export default function App() {
           )}
 
           {/* VIEW 2: THE EXAMINATION DATABASE & PACE COACH (GPT 5.6 TERRA) */}
-          {currentView === 'exam_coach' && appEdition === 'v2.5' && (
+          {currentView === 'exam_coach' && (appEdition === 'v2.5' || appEdition === 'exam_only') && (
             <ExamWorkspace
               exams={exams}
               userPlan={userExamPlan}
@@ -685,12 +804,17 @@ export default function App() {
               onSaveCustomExam={handleSaveCustomExam}
               onDeleteCustomExam={handleDeleteCustomExam}
               onAddTopicAsDailyTask={handleAddTopicAsDailyTask}
-              onClose={() => setCurrentView('morning')}
+              onClose={() => {
+                if (appEdition === 'exam_only') {
+                  setAppEdition('v2.5');
+                }
+                setCurrentView('morning');
+              }}
             />
           )}
 
           {/* VIEW 3: FLASHGENIE (AI VISUAL FLASHCARD GENERATOR & SPACED REPETITION) */}
-          {currentView === 'flashgenie' && appEdition === 'v2.5' && (
+          {currentView === 'flashgenie' && (appEdition === 'v2.5' || appEdition === 'flashgenie_only') && (
             <FlashGenieStudio
               cards={flashCards}
               decks={flashDecks}
@@ -700,7 +824,12 @@ export default function App() {
               onDeleteCard={handleDeleteFlashCard}
               onUpdateCardRating={handleUpdateCardRating}
               onCreateDeck={handleCreateDeck}
-              onClose={() => setCurrentView('morning')}
+              onClose={() => {
+                if (appEdition === 'flashgenie_only') {
+                  setAppEdition('v2.5');
+                }
+                setCurrentView('morning');
+              }}
             />
           )}
         </main>
@@ -819,6 +948,7 @@ export default function App() {
           onChangeEdition={setAppEdition}
           isMobileAppShell={isMobileAppShell}
           onToggleMobileAppShell={setIsMobileAppShell}
+          onSelectView={setCurrentView}
         />
 
         {/* Offline Connectivity Toast (PWA Requirement) */}

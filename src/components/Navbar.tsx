@@ -48,38 +48,60 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center gap-3 sm:gap-4">
           <div className="flex items-center gap-2">
             <div
-              onClick={() => onSelectView('morning')}
+              onClick={() => {
+                if (appEdition === 'exam_only') onSelectView('exam_coach');
+                else if (appEdition === 'flashgenie_only') onSelectView('flashgenie');
+                else onSelectView('morning');
+              }}
               className="flex items-center gap-2.5 cursor-pointer"
             >
               <div className="relative flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-indigo-600 shadow-md shadow-amber-500/20 text-white font-bold">
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="4" />
-                  <path d="M12 2v2" />
-                  <path d="M12 20v2" />
-                  <path d="m4.93 4.93 1.41 1.41" />
-                  <path d="m17.66 17.66 1.41 1.41" />
-                  <path d="M2 12h2" />
-                  <path d="M20 12h2" />
-                  <path d="m6.34 17.66-1.41 1.41" />
-                  <path d="m19.07 4.93-1.41 1.41" />
-                </svg>
+                {appEdition === 'exam_only' ? (
+                  <GraduationCap className="w-5 h-5" />
+                ) : appEdition === 'flashgenie_only' ? (
+                  <Sparkles className="w-5 h-5" />
+                ) : (
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 2v2" />
+                    <path d="M12 20v2" />
+                    <path d="m4.93 4.93 1.41 1.41" />
+                    <path d="m17.66 17.66 1.41 1.41" />
+                    <path d="M2 12h2" />
+                    <path d="M20 12h2" />
+                    <path d="m6.34 17.66-1.41 1.41" />
+                    <path d="m19.07 4.93-1.41 1.41" />
+                  </svg>
+                )}
               </div>
-              <span className="text-base sm:text-lg font-bold tracking-tight">AuraDay</span>
+              <span className="text-base sm:text-lg font-bold tracking-tight">
+                {appEdition === 'exam_only'
+                  ? 'ExamMaster Terra'
+                  : appEdition === 'flashgenie_only'
+                  ? 'FlashGenie AI'
+                  : 'AuraDay'}
+              </span>
             </div>
 
             {onOpenAppVersion && (
               <button
                 onClick={onOpenAppVersion}
-                title="View App Version, Switch Edition (v2.5 / v1.0) & Mobile App Mode"
+                title="Switch Separate Websites (AuraDay v1.0, Exam Coach Website, FlashGenie Website) or Mobile App Mode"
                 className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30 hover:bg-amber-500 hover:text-slate-950 transition"
               >
-                {appEdition === 'v2.5' ? 'v2.5.0' : 'v1.0.0'}
+                {appEdition === 'v1.0'
+                  ? 'v1.0 Website'
+                  : appEdition === 'exam_only'
+                  ? 'Exam Website'
+                  : appEdition === 'flashgenie_only'
+                  ? 'FlashGenie Site'
+                  : 'v2.5.0'}
               </button>
             )}
           </div>
 
           {/* Core Module Navigation Tabs */}
-          {!isMobileAppShell && (
+          {!isMobileAppShell && appEdition === 'v2.5' && (
             <nav className="flex items-center p-1 rounded-xl bg-black/20 border border-inherit/40 text-xs font-semibold">
               <button
                 onClick={() => onSelectView('morning')}
@@ -93,33 +115,29 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <span className="hidden md:inline">Morning Focus</span>
               </button>
 
-              {appEdition === 'v2.5' && (
-                <>
-                  <button
-                    onClick={() => onSelectView('exam_coach')}
-                    className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg transition ${
-                      currentView === 'exam_coach'
-                        ? 'bg-sky-500 text-slate-950 font-bold shadow-sm'
-                        : 'opacity-70 hover:opacity-100 hover:text-sky-400'
-                    }`}
-                  >
-                    <span>🎓</span>
-                    <span>Exam Coach</span>
-                  </button>
+              <button
+                onClick={() => onSelectView('exam_coach')}
+                className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg transition ${
+                  currentView === 'exam_coach'
+                    ? 'bg-sky-500 text-slate-950 font-bold shadow-sm'
+                    : 'opacity-70 hover:opacity-100 hover:text-sky-400'
+                }`}
+              >
+                <span>🎓</span>
+                <span>Exam Coach</span>
+              </button>
 
-                  <button
-                    onClick={() => onSelectView('flashgenie')}
-                    className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg transition ${
-                      currentView === 'flashgenie'
-                        ? 'bg-rose-500 text-white font-bold shadow-sm'
-                        : 'opacity-70 hover:opacity-100 hover:text-rose-400'
-                    }`}
-                  >
-                    <span>🧞‍♂️</span>
-                    <span>FlashGenie</span>
-                  </button>
-                </>
-              )}
+              <button
+                onClick={() => onSelectView('flashgenie')}
+                className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg transition ${
+                  currentView === 'flashgenie'
+                    ? 'bg-rose-500 text-white font-bold shadow-sm'
+                    : 'opacity-70 hover:opacity-100 hover:text-rose-400'
+                }`}
+              >
+                <span>🧞‍♂️</span>
+                <span>FlashGenie</span>
+              </button>
             </nav>
           )}
         </div>
@@ -130,15 +148,15 @@ export const Navbar: React.FC<NavbarProps> = ({
           {onOpenAppVersion && (
             <button
               onClick={onOpenAppVersion}
-              title="App Version, Mobile App Frame & Install Options"
+              title="Open Separate Standalone Websites or Mobile App Mode"
               className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-all active:scale-95 ${
                 isMobileAppShell
                   ? 'bg-sky-500 text-slate-950 border-sky-400 shadow-sm'
-                  : 'bg-sky-500/10 border-sky-500/30 text-sky-400 hover:bg-sky-500/20'
+                  : 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/25'
               }`}
             >
               <Smartphone className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{isMobileAppShell ? 'App Mode On' : 'App Version'}</span>
+              <span className="hidden sm:inline">{isMobileAppShell ? 'App Mode On' : 'Separate Websites'}</span>
             </button>
           )}
 

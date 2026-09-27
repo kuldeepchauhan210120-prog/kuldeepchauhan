@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import {
   X, Smartphone, Monitor, Download, CheckCircle2, Sparkles,
   Layers, History, ShieldCheck, Wifi, Cpu, ArrowRight, Check,
-  Apple, Chrome, Globe, Zap
+  Apple, Chrome, Globe, Zap, Copy, ExternalLink, Link2
 } from 'lucide-react';
 import { usePWAInstall } from '../hooks/usePWAInstall';
 
-export type AppEdition = 'v2.5' | 'v1.0';
+export type AppEdition = 'v2.5' | 'v1.0' | 'exam_only' | 'flashgenie_only';
 
 interface AppVersionModalProps {
   isOpen: boolean;
@@ -15,6 +15,7 @@ interface AppVersionModalProps {
   onChangeEdition: (edition: AppEdition) => void;
   isMobileAppShell: boolean;
   onToggleMobileAppShell: (enabled: boolean) => void;
+  onSelectView?: (view: 'morning' | 'exam_coach' | 'flashgenie') => void;
 }
 
 export const APP_VERSION_INFO = {
@@ -81,12 +82,64 @@ export const AppVersionModal: React.FC<AppVersionModalProps> = ({
   onChangeEdition,
   isMobileAppShell,
   onToggleMobileAppShell,
+  onSelectView,
 }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'install' | 'changelog'>('overview');
+  const [activeTab, setActiveTab] = useState<'websites' | 'overview' | 'install' | 'changelog'>('websites');
   const { isInstallable, isInstalled, isIOS, install } = usePWAInstall();
   const [installTriggered, setInstallTriggered] = useState(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   if (!isOpen) return null;
+
+  const baseUrl =
+    typeof window !== 'undefined'
+      ? window.location.origin
+      : 'https://ais-pre-ntxncz3dzykglrfbebt4qr-43493433633.asia-east1.run.app';
+
+  const handleCopyUrl = (key: string, url: string) => {
+    navigator.clipboard.writeText(url);
+    setCopiedKey(key);
+    setTimeout(() => setCopiedKey(null), 2200);
+  };
+
+  const SEPARATE_WEBSITES = [
+    {
+      id: 'v1.0' as AppEdition,
+      view: 'morning' as const,
+      badge: 'Website 1 · Original v1.0',
+      name: 'AuraDay Morning Focus (Separate Original Website)',
+      desc: 'Standalone distraction-free Morning Sanctuary: 365 Daily Quotes, Top 3 Priority Slots, Habits, and Pomodoro Timer with zero Exam/Flashcard clutter.',
+      url: `${baseUrl}/?portal=auraday`,
+      accent: 'amber',
+    },
+    {
+      id: 'exam_only' as AppEdition,
+      view: 'exam_coach' as const,
+      badge: 'Website 2 · Exam Portal',
+      name: 'Exam Master & GPT 5.6 Terra (Separate Exam Website)',
+      desc: 'Dedicated standalone Examination Database (JEE, NEET, UPSC, SAT, GATE, CAT) & AI Daily Study Pace Coach website.',
+      url: `${baseUrl}/?portal=exam`,
+      accent: 'sky',
+    },
+    {
+      id: 'flashgenie_only' as AppEdition,
+      view: 'flashgenie' as const,
+      badge: 'Website 3 · FlashGenie Portal',
+      name: 'FlashGenie AI Studio (Separate Flashcard Website)',
+      desc: 'Dedicated standalone AI Visual Flashcard Generator, custom SVG mnemonic illustrations, 3D flip cards & SM-2 Spaced Repetition website.',
+      url: `${baseUrl}/?portal=flashgenie`,
+      accent: 'rose',
+    },
+    {
+      id: 'v2.5' as AppEdition,
+      view: 'morning' as const,
+      badge: 'All-in-One · Unified v2.5',
+      name: 'Complete AuraDay v2.5 Suite (All 3 Connected)',
+      desc: 'Unified website & app combining Morning Focus + Exam Coach + FlashGenie in one top navigation bar.',
+      url: `${baseUrl}/?portal=suite`,
+      accent: 'emerald',
+    },
+  ];
 
   const handleInstallClick = async () => {
     if (isInstallable) {
@@ -129,10 +182,22 @@ export const AppVersionModal: React.FC<AppVersionModalProps> = ({
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex border-b border-slate-800 bg-slate-950/50 px-5 text-xs font-semibold">
+        <div className="flex overflow-x-auto border-b border-slate-800 bg-slate-950/50 px-5 text-xs font-semibold">
+          <button
+            onClick={() => setActiveTab('websites')}
+            className={`py-3 px-3.5 border-b-2 transition flex items-center gap-1.5 whitespace-nowrap ${
+              activeTab === 'websites'
+                ? 'border-emerald-400 text-emerald-400'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Globe className="w-3.5 h-3.5" />
+            <span>Separate Websites</span>
+          </button>
+
           <button
             onClick={() => setActiveTab('overview')}
-            className={`py-3 px-3.5 border-b-2 transition flex items-center gap-1.5 ${
+            className={`py-3 px-3.5 border-b-2 transition flex items-center gap-1.5 whitespace-nowrap ${
               activeTab === 'overview'
                 ? 'border-amber-500 text-amber-400'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
@@ -144,7 +209,7 @@ export const AppVersionModal: React.FC<AppVersionModalProps> = ({
 
           <button
             onClick={() => setActiveTab('install')}
-            className={`py-3 px-3.5 border-b-2 transition flex items-center gap-1.5 ${
+            className={`py-3 px-3.5 border-b-2 transition flex items-center gap-1.5 whitespace-nowrap ${
               activeTab === 'install'
                 ? 'border-amber-500 text-amber-400'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
@@ -156,7 +221,7 @@ export const AppVersionModal: React.FC<AppVersionModalProps> = ({
 
           <button
             onClick={() => setActiveTab('changelog')}
-            className={`py-3 px-3.5 border-b-2 transition flex items-center gap-1.5 ${
+            className={`py-3 px-3.5 border-b-2 transition flex items-center gap-1.5 whitespace-nowrap ${
               activeTab === 'changelog'
                 ? 'border-amber-500 text-amber-400'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
@@ -169,6 +234,95 @@ export const AppVersionModal: React.FC<AppVersionModalProps> = ({
 
         {/* Modal Body */}
         <div className="p-5 sm:p-6 overflow-y-auto flex-1 space-y-6">
+          {activeTab === 'websites' && (
+            <div className="space-y-4">
+              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h3 className="text-sm font-bold text-emerald-300 flex items-center gap-2">
+                    <Globe className="w-4 h-4" />
+                    <span>Standalone Separate Websites &amp; Direct URLs</span>
+                  </h3>
+                  <p className="text-xs text-slate-300 mt-1">
+                    Each product can be opened as its own <strong>100% separate standalone website</strong> without the other modules, or combined into the unified v2.5 suite.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {SEPARATE_WEBSITES.map((site) => {
+                  const isActive = appEdition === site.id;
+                  return (
+                    <div
+                      key={site.id}
+                      className={`p-4 rounded-2xl border transition-all ${
+                        isActive
+                          ? 'bg-slate-800/90 border-amber-500 ring-2 ring-amber-500/30'
+                          : 'bg-slate-950/70 border-slate-800 hover:border-slate-700'
+                      }`}
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-white/10 text-amber-300">
+                            {site.badge}
+                          </span>
+                          {isActive && (
+                            <span className="text-[11px] font-bold text-emerald-400 flex items-center gap-1">
+                              <CheckCircle2 className="w-3.5 h-3.5" /> Active Website Now
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleCopyUrl(site.id, site.url)}
+                            className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition"
+                            title="Copy separate standalone website link"
+                          >
+                            {copiedKey === site.id ? (
+                              <>
+                                <Check className="w-3.5 h-3.5 text-emerald-400" />
+                                <span className="text-emerald-400">Copied URL!</span>
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-3.5 h-3.5" />
+                                <span>Copy Link</span>
+                              </>
+                            )}
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              onToggleMobileAppShell(false);
+                              onChangeEdition(site.id);
+                              if (onSelectView) onSelectView(site.view);
+                              onClose();
+                            }}
+                            className={`px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition ${
+                              isActive
+                                ? 'bg-emerald-500 text-slate-950'
+                                : 'bg-amber-500 hover:bg-amber-400 text-slate-950'
+                            }`}
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                            <span>{isActive ? 'Viewing Now' : 'Open This Separate Website'}</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      <h4 className="text-sm font-bold text-white">{site.name}</h4>
+                      <p className="text-xs text-slate-400 mt-1 leading-relaxed">{site.desc}</p>
+
+                      <div className="mt-2.5 px-3 py-1.5 rounded-xl bg-black/40 border border-slate-800/80 flex items-center justify-between gap-2 font-mono text-[11px] text-sky-300 overflow-x-auto">
+                        <span className="truncate">{site.url}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {activeTab === 'overview' && (
             <>
               {/* 1. Interactive Viewport Mode: Mobile App Shell vs Desktop Web */}
